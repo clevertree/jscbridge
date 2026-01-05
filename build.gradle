@@ -2,6 +2,7 @@ plugins {
     id 'com.android.library' version '8.1.0'
     id 'org.jetbrains.kotlin.android' version '1.9.0'
     id 'maven-publish'
+    id 'signing'
 }
 
 android {
@@ -48,6 +49,7 @@ android {
     publishing {
         singleVariant("release") {
             withSourcesJar()
+            withJavadocJar()
         }
     }
 }
@@ -73,11 +75,47 @@ afterEvaluate {
                     name = 'JSC Bridge'
                     description = 'Cross-platform JavaScriptCore bridge for Relay'
                     url = 'https://github.com/clevertree/jscbridge'
+                    licenses {
+                        license {
+                            name = 'MIT OR Apache-2.0'
+                            url = 'https://opensource.org/licenses/MIT'
+                        }
+                    }
+                    developers {
+                        developer {
+                            id = 'clevertree'
+                            name = 'Ari Asulin'
+                            email = 'ari.asulin@gmail.com'
+                        }
+                    }
+                    scm {
+                        connection = 'scm:git:github.com/clevertree/jscbridge.git'
+                        developerConnection = 'scm:git:ssh://github.com/clevertree/jscbridge.git'
+                        url = 'https://github.com/clevertree/jscbridge'
+                    }
                 }
             }
         }
         repositories {
+            maven {
+                name = "OSSRH"
+                url = "https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/"
+                credentials {
+                    username = project.findProperty("ossrhUsername") ?: System.getenv("OSSRH_USERNAME")
+                    password = project.findProperty("ossrhPassword") ?: System.getenv("OSSRH_PASSWORD")
+                }
+            }
             mavenLocal()
         }
+    }
+
+    signing {
+        required { gradle.taskGraph.hasTask("publish") }
+        def signingKey = project.findProperty("signing.secretKey")
+        def signingPassword = project.findProperty("signing.password")
+        if (signingKey) {
+            useInMemoryPgpKeys(signingKey, signingPassword ?: "")
+        }
+        sign publishing.publications.release
     }
 }

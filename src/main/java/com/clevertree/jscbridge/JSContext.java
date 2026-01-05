@@ -29,6 +29,8 @@ public class JSContext {
 
     public native void setObjectForKey(String key, JavaScriptObject object);
 
+    public native void garbageCollect();
+
     public JSObject getGlobalObject() {
         return new JSObject();
     }
